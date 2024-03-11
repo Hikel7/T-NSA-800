@@ -19,15 +19,27 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
-    - name: Create .env File
+    - name: Replace environment variables
       run: |
         cp .env.example .env
-        sed -i "s#DB_USERNAME=homestead#DB_USERNAME=${{ secrets.DB_USERNAME }}#g" .env
-        sed -i "s#DB_PASSWORD=secret#DB_PASSWORD=${{ secrets.DB_PASSWORD }}#g" .env
-        sed -i "s#DB_DATABASE=homestead#DB_DATABASE=${{ secrets.DB_DATABASE }}#g" .env
-        sed -i "s#DB_HOST=homestead#DB_HOST=${{ secrets.DB_HOST }}#g" .env
-        sed -i "s#DB_PORT=3306#DB_PORT=${{ secrets.DB_PORT }}#g" .env
-        sed -i "s#MYSQL_ATTR_SSL_CA=#MYSQL_ATTR_SSL_CA=${{ secrets.MYSQL_ATTR_SSL_CA }}#g" .env
+        php -r '
+          $replacements = [
+            "DB_USERNAME" => getenv("DB_USERNAME"),
+            "DB_PASSWORD" => getenv("DB_PASSWORD"),
+            "DB_DATABASE" => getenv("DB_DATABASE"),
+            "DB_HOST" => getenv("DB_HOST"),
+            "DB_PORT" => getenv("DB_PORT"),
+            "MYSQL_ATTR_SSL_CA" => getenv("MYSQL_ATTR_SSL_CA"),
+          ];
+
+          $envContent = file_get_contents(".env");
+
+          foreach ($replacements as $key => $value) {
+            $envContent = preg_replace("/$key=.*/", "$key=$value", $envContent);
+          }
+
+          file_put_contents(".env", $envContent);
+        '
 
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
