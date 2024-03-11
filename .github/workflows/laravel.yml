@@ -22,12 +22,12 @@ jobs:
     - name: Create .env File
       run: |
         cp .env.example .env
-        sed -i "s/DB_USERNAME=homestead/DB_USERNAME=${{ secrets.DB_USERNAME }}/g" .env
-        sed -i "s/DB_PASSWORD=secret/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/g" .env
-        sed -i "s/DB_DATABASE=homestead/DB_DATABASE=${{ secrets.DB_DATABASE }}/g" .env
-        sed -i "s/DB_HOST=homestead/DB_HOST=${{ secrets.DB_HOST }}/g" .env
-        sed -i "s/DB_PORT=3306/DB_PORT=${{ secrets.DB_PORT }}/g" .env
-        sed -i "s/MYSQL_ATTR_SSL_CA=/MYSQL_ATTR_SSL_CA=${{ secrets.MYSQL_ATTR_SSL_CA }}/g" .env
+        sed -i "s#DB_USERNAME=homestead#DB_USERNAME=${{ secrets.DB_USERNAME }}#g" .env
+        sed -i "s#DB_PASSWORD=secret#DB_PASSWORD=${{ secrets.DB_PASSWORD }}#g" .env
+        sed -i "s#DB_DATABASE=homestead#DB_DATABASE=${{ secrets.DB_DATABASE }}#g" .env
+        sed -i "s#DB_HOST=homestead#DB_HOST=${{ secrets.DB_HOST }}#g" .env
+        sed -i "s#DB_PORT=3306#DB_PORT=${{ secrets.DB_PORT }}#g" .env
+        sed -i "s#MYSQL_ATTR_SSL_CA=#MYSQL_ATTR_SSL_CA=${{ secrets.MYSQL_ATTR_SSL_CA }}#g" .env
 
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
