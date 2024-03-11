@@ -2,9 +2,9 @@ name: Laravel
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
   laravel-tests:
@@ -24,12 +24,12 @@ jobs:
         cp .env.example .env
         php -r '
           $replacements = [
-            "DB_USERNAME" => getenv("DB_USERNAME"),
-            "DB_PASSWORD" => getenv("DB_PASSWORD"),
-            "DB_DATABASE" => getenv("DB_DATABASE"),
-            "DB_HOST" => getenv("DB_HOST"),
-            "DB_PORT" => getenv("DB_PORT"),
-            "MYSQL_ATTR_SSL_CA" => getenv("MYSQL_ATTR_SSL_CA"),
+            "DB_USERNAME" => $_ENV["DB_USERNAME"],
+            "DB_PASSWORD" => $_ENV["DB_PASSWORD"],
+            "DB_DATABASE" => $_ENV["DB_DATABASE"],
+            "DB_HOST" => $_ENV["DB_HOST"],
+            "DB_PORT" => $_ENV["DB_PORT"],
+            "MYSQL_ATTR_SSL_CA" => $_ENV["MYSQL_ATTR_SSL_CA"],
           ];
 
           $envContent = file_get_contents(".env");
@@ -55,3 +55,37 @@ jobs:
 
     - name: Migrate Database
       run: php artisan migrate --force
+
+build-and-push-docker:
+    needs: laravel-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Log in to the Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.ACR_LOGIN_SERVER }}/myapp:${{ github.sha }}
+
+deploy-to-azure:
+  needs: build-and-push-docker
+  runs-on: ubuntu-latest
+  steps:
+    - name: Deploy to Azure App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'myAppServiceLostOps'
+        slot-name: 'production'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        images: '${{ secrets.ACR_LOGIN_SERVER }}/myapp:${{ github.sha }}'
