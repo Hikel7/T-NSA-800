@@ -40,5 +40,6 @@ jobs:
 
     - name: Create Database
       run: php artisan db:seed --force |  php artisan cache:clear | php artisan route:clear | php artisan config:clear | php artisan view:clear
+
     - name: Migrate Database
-      run: php artisan migrate --force 
+      run: php artisan migrate --force
