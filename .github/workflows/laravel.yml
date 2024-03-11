@@ -61,6 +61,23 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.ACR_LOGIN_SERVER }}/myapp:${{ github.sha }}
+  
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: 7e4cd4ee-c7ce-465e-961f-f6d02cf42eb2
+          tenant-id: 901cb4ca-b862-4029-9306-e5cd0f6d9f86
+          subscription-id: 4e275dfd-9c29-4568-991c-8c0d17baad9b
+  
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az account show
 
   deploy-to-azure:
     needs: build-and-push-docker
