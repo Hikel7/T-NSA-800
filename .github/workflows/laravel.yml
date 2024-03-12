@@ -74,12 +74,16 @@ jobs:
           tenant-id: 901cb4ca-b862-4029-9306-e5cd0f6d9f86 
           subscription-id: 4e275dfd-9c29-4568-991c-8c0d17baad9b
   
-      - name: Azure CLI script
-        uses: azure/CLI@v1
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az account show
+      # - name: Azure CLI script
+      #   uses: azure/CLI@v1
+      #   with:
+      #     azcliversion: latest
+      #     inlineScript: |
+      #       az account show
+      - name: 'Run az commands'
+        run: |
+          az account show
+          az group list
 
   deploy-to-azure:
     needs: build-and-push-docker
