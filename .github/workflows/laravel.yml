@@ -37,6 +37,7 @@ jobs:
           php artisan route:clear
           php artisan config:clear
           php artisan view:clear
+          php artisan key:generate
 
       - name: Migrate Database
         run: php artisan migrate --force
