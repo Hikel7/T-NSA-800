@@ -103,5 +103,5 @@ jobs:
         with:
           app-name: 'myAppServiceLostOps'
           slot-name: 'production'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           images: '${{ secrets.ACR_LOGIN_SERVER }}/myapp:${{ github.sha }}'
