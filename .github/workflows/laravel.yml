@@ -66,6 +66,7 @@ jobs:
   
   build-and-deploy:
     runs-on: ubuntu-latest
+    needs: build-and-push-docker
     steps:
       - name: Azure login
         uses: azure/login@v2 
@@ -80,7 +81,7 @@ jobs:
             az account show
 
   deploy-to-azure:
-    needs: build-and-push-docker
+    needs: build-and-deploy
     runs-on: ubuntu-latest
 
     steps:
