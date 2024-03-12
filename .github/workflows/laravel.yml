@@ -70,20 +70,16 @@ jobs:
       - name: Azure login
         uses: azure/login@v2 
         with:
-          client-id: 7e4cd4ee-c7ce-465e-961f-f6d02cf42eb2
+          client-id: eb2a137f-623d-43b1-bb26-3e7f0c3bd4a3
           tenant-id: 901cb4ca-b862-4029-9306-e5cd0f6d9f86 
           subscription-id: 4e275dfd-9c29-4568-991c-8c0d17baad9b
   
-      # - name: Azure CLI script
-      #   uses: azure/CLI@v1
-      #   with:
-      #     azcliversion: latest
-      #     inlineScript: |
-      #       az account show
-      - name: 'Run az commands'
-        run: |
-          az account show
-          az group list
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az account show
 
   deploy-to-azure:
     needs: build-and-push-docker
