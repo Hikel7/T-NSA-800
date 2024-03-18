@@ -50,7 +50,8 @@ jobs:
       #   run: docker-compose -f ./docker-compose.yaml exec -T app php artisan migrate --force
 
       - name: Save artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: laravel-artifacts
-          path: ./build/*
+          name: my-artifact
+          path: my_file.txt
+          retention-days: 5
