@@ -46,8 +46,8 @@ jobs:
           docker-compose -f ./docker-compose.yaml exec -T app php artisan view:clear
           docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
 
-      - name: Migrate Database
-        run: docker-compose -f ./docker-compose.yaml exec -T app php artisan migrate --force
+      # - name: Migrate Database
+      #   run: docker-compose -f ./docker-compose.yaml exec -T app php artisan migrate --force
 
       - name: Save artifacts
         uses: actions/upload-artifact@v2
