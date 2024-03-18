@@ -11,4 +11,4 @@ ENV MYSQL_DATABASE=lostopsdb \
 VOLUME /var/lib/mysql
 
 # Copy the SSL certificate from host to container (assuming it's needed)
-COPY /chemin/sur/hote/ca-cert.pem /chemin/dans/conteneur/ca-cert.pem
+# COPY /chemin/sur/hote/ca-cert.pem /chemin/dans/conteneur/ca-cert.pem

@@ -48,6 +48,6 @@ services:
       MYSQL_ROOT_PASSWORD: H@Sh1CoR3P@ssw0rd
     volumes:
       - db_data:/var/lib/mysql
-      - /chemin/sur/hote/ca-cert.pem:/chemin/dans/conteneur/ca-cert.pem
+      # - /chemin/sur/hote/ca-cert.pem:/chemin/dans/conteneur/ca-cert.pem
 volumes:
   db_data:
