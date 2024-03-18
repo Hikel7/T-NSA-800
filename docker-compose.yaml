@@ -37,7 +37,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`localhost`)"
   db:
-    image: mysql:5.7
+    build:
+      context: .
+      dockerfile: Dockerfile.db # Assuming your Dockerfile for the db service is named Dockerfile.db
     restart: always
     environment:
       MYSQL_DATABASE: lostopsdb
