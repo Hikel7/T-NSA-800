@@ -46,9 +46,15 @@ jobs:
           docker-compose -f ./docker-compose.yaml exec -T app php artisan view:clear
           docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
 
+      - name: Check if docker_images directory exists
+        run: |
+          if [ ! -d "docker_images" ]; then
+            mkdir -p docker_images
+          fi
+        working-directory: ${{ github.workspace }}
+
       - name: Save Docker images as artifacts
         run: |
-          mkdir -p docker_images
           docker-compose -f ./docker-compose.yaml ps -q | xargs -I {} sh -c 'docker save -o docker_images/{}.tar {}'
         working-directory: ${{ github.workspace }}
 
