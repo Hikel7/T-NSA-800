@@ -54,14 +54,6 @@ jobs:
           done
         working-directory: ${{ github.workspace }}
 
-      # - name: List contents of docker_images directory
-      #   run: ls -l docker_images/
-
-      # - name: Upload Docker images as artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: docker-images
-      #     path: docker_images/
       - name: Install Ansible
         run: |
           sudo apt update
@@ -70,7 +62,3 @@ jobs:
       - name: Run Ansible playbook
         run: |
           ansible-playbook -i inventory.yml copy_artifacts.yml --extra-vars "artifact_url=https://github.com/${{ github.repository }}/raw/${{ github.ref }}/docker_images"
-        environment:
-          ANSIBLE_HOST_KEY_CHECKING: false
-          ANSIBLE_PRIVATE_KEY_FILE: ./key-ssh.pub
-
