@@ -62,15 +62,14 @@ jobs:
       #   with:
       #     name: docker-images
       #     path: docker_images/
-      - name: Run Ansible playbook to copy artifacts
-        uses: appleboy/ansible-action@v2
-        with:
-          playbook: copy_artifacts.yml
-          extra_vars: artifact_url=https://github.com/${{ github.repository }}/raw/${{ github.ref }}/docker_images
-        env:
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Run Ansible playbook
+        run: |
+          ansible-playbook -i inventory.yml copy_artifacts.yml --extra-vars "artifact_url=https://github.com/${{ github.repository }}/raw/${{ github.ref }}/docker_images"
+        environment:
           ANSIBLE_HOST_KEY_CHECKING: "false"
-          ANSIBLE_REMOTE_TEMP: "/tmp"
-          ANSIBLE_TRANSPORT: "ssh"
-          ANSIBLE_SSH_PIPELINING: "true"
-          ANSIBLE_CONFIG: "./ansible.cfg"
-          ANSIBLE_FORCE_COLOR: "true"
+
