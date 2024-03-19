@@ -46,7 +46,7 @@ jobs:
           docker-compose -f ./docker-compose.yaml exec -T app php artisan view:clear
           docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
 
-      - name: Save Docker images as artifacts
+      - name: Build and push Docker images
         run: |
           mkdir -p docker_images
           services=$(docker-compose -f ./docker-compose.yaml config --services)
@@ -55,6 +55,9 @@ jobs:
             docker-compose -f ./docker-compose.yaml push $service
           done
         working-directory: ${{ github.workspace }}
+
+      - name: List Docker images
+        run: docker images
 
       - name: List contents of docker_images directory
         run: ls -l docker_images/
