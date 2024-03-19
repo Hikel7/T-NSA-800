@@ -46,15 +46,23 @@ jobs:
           docker-compose -f ./docker-compose.yaml exec -T app php artisan view:clear
           docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
 
-      - name: Build and push Docker images
+      - name: Save Docker images as artifacts
         run: |
           mkdir -p docker_images
-          services=$(docker-compose -f ./docker-compose.yaml config --services)
-          for service in $services; do
-            docker-compose -f ./docker-compose.yaml build $service
-            docker-compose -f ./docker-compose.yaml push $service
+          docker images --format "{{.Repository}}:{{.Tag}}" | grep t-nsa-800 | while IFS=: read -r repo tag; do
+            docker save -o "docker_images/${repo}_${tag}.tar" "${repo}:${tag}"
           done
         working-directory: ${{ github.workspace }}
+
+      # - name: Build and push Docker images
+      #   run: |
+      #     mkdir -p docker_images
+      #     services=$(docker-compose -f ./docker-compose.yaml config --services)
+      #     for service in $services; do
+      #       docker-compose -f ./docker-compose.yaml build $service
+      #       docker-compose -f ./docker-compose.yaml push $service
+      #     done
+      #   working-directory: ${{ github.workspace }}
 
       - name: List Docker images
         run: docker images
