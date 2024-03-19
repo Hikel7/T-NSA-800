@@ -46,20 +46,50 @@ jobs:
           docker-compose -f ./docker-compose.yaml exec -T app php artisan view:clear
           docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
 
-      - name: Save Docker images as artifacts
+      - name: Build and push Docker images
         run: |
           mkdir -p docker_images
-          docker images --format "{{.Repository}}:{{.Tag}}" | grep t-nsa-800 | while IFS=: read -r repo tag; do
-            docker save -o "docker_images/${repo}_${tag}.tar" "${repo}:${tag}"
+          services=$(docker-compose -f ./docker-compose.yaml config --services)
+          for service in $services; do
+            docker-compose -f ./docker-compose.yaml build $service
+            docker-compose -f ./docker-compose.yaml push $service
           done
         working-directory: ${{ github.workspace }}
 
-      - name: Install Ansible
-        run: |
-          sudo apt update
-          sudo apt install -y ansible
+      - name: List Docker images
+        run: docker images
 
-      - name: Run Ansible playbook
+      - name: List contents of docker_images directory
+        run: ls -l docker_images/
+
+      - name: Upload Docker images as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-images
+          path: docker_images/
+    
+      - name: Download Docker images artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: docker-images
+          path: .
+
+      - name: Load Docker images and push to remote server
         run: |
-          ansible-playbook -i inventory.yml copy_artifacts.yml --extra-vars "artifact_url=https://github.com/${{ github.repository }}/raw/${{ github.ref }}/docker_images" -e "ANSIBLE_HOST_KEY_CHECKING=False" --private-key=./new-key-ssa.pem
- 
+          mkdir -p ansible
+          echo "- hosts: remote
+            tasks:
+              - name: Copy Docker images
+                copy:
+                  src: ./docker_images/
+                  dest: /home
+                  owner: root
+                  group: root
+                  mode: '0755'
+              - name: Load Docker images
+                command: docker load -i /home/{{ item }}
+                with_items: "{{ lookup('fileglob', './docker_images/*', wantlist=True) }}"
+            become: yes" > ansible/deploy.yml
+          ansible-playbook -i ./inventory.yml ansible/deploy.yml
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: False
