@@ -51,8 +51,10 @@ jobs:
           mkdir -p docker_images
           docker images --format "{{.Repository}}:{{.Tag}}" | grep t-nsa-800 | while IFS=: read -r repo tag; do
             docker save -o "docker_images/${repo}_${tag}.tar" "${repo}:${tag}"
+            echo "Saved ${repo}:${tag}"
           done
         working-directory: ${{ github.workspace }}
+
 
       # - name: Build and push Docker images
       #   run: |
