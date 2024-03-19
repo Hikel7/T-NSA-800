@@ -79,10 +79,11 @@ jobs:
           path: docker_images/
     
       - name: Download Docker images artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: docker-images
-          path: docker_images
+        run: |
+          mkdir -p docker_images
+          curl -L -o docker_images/docker-images.tar.gz <URL_OF_ARTIFACT>
+          tar -xzf docker_images/docker-images.tar.gz -C docker_images/
+        working-directory: ${{ github.workspace }}
 
       - name: Load Docker images and push to remote server
         run: |
