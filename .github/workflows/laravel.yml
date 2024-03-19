@@ -54,11 +54,23 @@ jobs:
           done
         working-directory: ${{ github.workspace }}
 
-      - name: List contents of docker_images directory
-        run: ls -l docker_images/
+      # - name: List contents of docker_images directory
+      #   run: ls -l docker_images/
 
-      - name: Upload Docker images as artifacts
-        uses: actions/upload-artifact@v4
+      # - name: Upload Docker images as artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: docker-images
+      #     path: docker_images/
+      - name: Run Ansible playbook to copy artifacts
+        uses: appleboy/ansible-action@v2
         with:
-          name: docker-images
-          path: docker_images/
+          playbook: copy_artifacts.yml
+          extra_vars: artifact_url=https://github.com/${{ github.repository }}/raw/${{ github.ref }}/docker_images
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "false"
+          ANSIBLE_REMOTE_TEMP: "/tmp"
+          ANSIBLE_TRANSPORT: "ssh"
+          ANSIBLE_SSH_PIPELINING: "true"
+          ANSIBLE_CONFIG: "./ansible.cfg"
+          ANSIBLE_FORCE_COLOR: "true"

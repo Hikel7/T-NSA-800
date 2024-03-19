@@ -1,0 +1,6 @@
+all:
+  hosts:
+    app_web:
+      ansible_host: 20.73.2.234  # IP address or hostname of the app_web server
+    app_db:
+      ansible_host: 20.73.159.184 # IP address or hostname of the app_db server
