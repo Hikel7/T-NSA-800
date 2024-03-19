@@ -59,6 +59,12 @@ jobs:
           sudo apt update
           sudo apt install -y ansible
 
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ID_RSA }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
       - name: Run Ansible playbook
         run: |
           ansible-playbook -i inventory.yml copy_artifacts.yml --extra-vars "artifact_url=https://github.com/${{ github.repository }}/raw/${{ github.ref }}/docker_images"
