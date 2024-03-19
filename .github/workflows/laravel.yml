@@ -51,7 +51,8 @@ jobs:
           mkdir -p docker_images
           services=$(docker-compose -f ./docker-compose.yaml config --services)
           for service in $services; do
-            docker-compose -f ./docker-compose.yaml ps -q $service | xargs -I {} sh -c 'docker save -o docker_images/${service}_{}.tar {}'
+            docker-compose -f ./docker-compose.yaml build $service
+            docker-compose -f ./docker-compose.yaml push $service
           done
         working-directory: ${{ github.workspace }}
 
