@@ -7,11 +7,11 @@
     - name: Copy t-nsa-800_app_latest.tar to app_web host
       ansible.builtin.fetch:
         src: "{{ artifact_url }}/t-nsa-800_app_latest.tar"
-        dest: "/tmp/t-nsa-800_app_latest.tar"
+        dest: "/home/t-nsa-800_app_latest.tar"
       when: inventory_hostname == 'app_web'
 
     - name: Copy t-nsa-800_db_latest.tar to app_db host
       ansible.builtin.fetch:
         src: "{{ artifact_url }}/t-nsa-800_db_latest.tar"
-        dest: "/tmp/t-nsa-800_db_latest.tar"
+        dest: "/home/t-nsa-800_db_latest.tar"
       when: inventory_hostname == 'app_db'
