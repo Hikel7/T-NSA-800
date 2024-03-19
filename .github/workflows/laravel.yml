@@ -56,6 +56,9 @@ jobs:
           done
         working-directory: ${{ github.workspace }}
 
+      - name: List contents of docker_images directory
+        run: ls -l docker_images/
+
       - name: Upload Docker images as artifacts
         uses: actions/upload-artifact@v4
         with:
