@@ -46,10 +46,14 @@ jobs:
           docker-compose -f ./docker-compose.yaml exec -T app php artisan view:clear
           docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
 
-      # - name: Migrate Database
-      #   run: docker-compose -f ./docker-compose.yaml exec -T app php artisan migrate --force
+      - name: Save Docker images as artifacts
+        run: |
+          mkdir -p docker_images
+          docker-compose -f ./docker-compose.yaml ps -q | xargs -I {} sh -c 'docker save -o docker_images/{}.tar {}'
+        working-directory: ${{ github.workspace }}
 
-      - name: Save artifacts
+      - name: Upload Docker images as artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: my-artifact
+          name: docker-images
+          path: docker_images/
