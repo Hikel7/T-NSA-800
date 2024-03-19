@@ -71,5 +71,6 @@ jobs:
         run: |
           ansible-playbook -i inventory.yml copy_artifacts.yml --extra-vars "artifact_url=https://github.com/${{ github.repository }}/raw/${{ github.ref }}/docker_images"
         environment:
-          ANSIBLE_HOST_KEY_CHECKING: "false"
+          ANSIBLE_HOST_KEY_CHECKING: false
+          ANSIBLE_PRIVATE_KEY_FILE: ./key-ssh.pub
 
