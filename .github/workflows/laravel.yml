@@ -62,7 +62,7 @@ jobs:
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.ID_RSA }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.ID_RSA_NSA }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
       - name: Run Ansible playbook
