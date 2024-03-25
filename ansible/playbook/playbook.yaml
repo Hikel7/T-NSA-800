@@ -1,5 +1,5 @@
 - name: Deploy Docker Images to App
-  hosts: all
+  hosts: app_host
   tasks:
     - name: Copy Docker Image for App
       copy:
@@ -18,7 +18,7 @@
       become: yes
 
 - name: Deploy Docker Images to DB 
-  hosts: database
+  hosts: db_host
   tasks:
     - name: Copy Docker Image for DB
       copy:

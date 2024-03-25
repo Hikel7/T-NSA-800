@@ -1,6 +1,10 @@
 all:
   children:
     app:
-        ansible_host: 23.97.228.5
-    database: 
-        db_host : 137.117.225.75
+      hosts:
+        app_host:
+          ansible_host: 192.0.2.1
+    database:
+      hosts:
+        db_host:
+          ansible_host: 198.51.100.1
