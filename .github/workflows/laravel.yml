@@ -91,6 +91,10 @@ jobs:
           echo "ARTIFACT_URL=$URL" >> $GITHUB_ENV
         shell: bash
 
+      - name: Debug downloaded file
+        run: |
+          ls -l docker_images/
+          file docker_images/docker-images.zip
 
     
       - name: Download Docker images artifact
@@ -98,6 +102,8 @@ jobs:
           mkdir -p docker_images
           # Utilisation de curl pour télécharger l'artefact
           curl -L -o docker_images/docker-images.zip ${{ env.ARTIFACT_URL }}
+          ls -l docker_images/
+          file docker_images/docker-images.zip
           # Utilisation de unzip pour extraire le fichier .zip
           unzip docker_images/docker-images.zip -d docker_images/
         working-directory: ${{ github.workspace }}
