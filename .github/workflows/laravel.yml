@@ -92,6 +92,10 @@ jobs:
         run: ls -lah docker_images/
         working-directory: ${{ github.workspace }}
 
-
+      - name: Load Docker Images
+        run: |
+          docker load -i docker_images/t-nsa-800_app_latest.tar
+          docker load -i docker_images/t-nsa-800_db_latest.tar
+        working-directory: ${{ github.workspace }}
 
   
