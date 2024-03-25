@@ -77,13 +77,27 @@ jobs:
         with:
           name: docker-images
           path: docker_images/
+
+      - name: Get Artifact Download URL
+        id: get-artifact-url
+        run: |
+          ARTIFACT_NAME="docker-images"
+          URL=$(curl \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+            | jq -r ".artifacts[] | select(.name==\"docker-images") | .archive_download_url")
+          echo "::set-output name=url::$URL"
+        shell: bash
+
     
       - name: Download Docker images artifact
         run: |
           mkdir -p docker_images
-          curl -L -o docker_images/docker-images.tar.gz <URL_OF_ARTIFACT>
+          curl -L -o docker_images/docker-images.tar.gz ${{ steps.get-artifact-url.outputs.url }}
           tar -xzf docker_images/docker-images.tar.gz -C docker_images/
         working-directory: ${{ github.workspace }}
+
 
       - name: Load Docker images and push to remote server
         run: |
