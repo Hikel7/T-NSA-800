@@ -83,13 +83,14 @@ jobs:
         id: get-artifact-url
         run: |
           ARTIFACT_NAME="docker-images"
-          URL=$(curl \
+          RESPONSE=$(curl -L -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
-            | jq -r ".artifacts[] | select(.name==\"$ARTIFACT_NAME\") | .archive_download_url")
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts")
+          URL=$(echo $RESPONSE | jq -r ".artifacts[] | select(.name==\"$ARTIFACT_NAME\") | .url")
           echo "ARTIFACT_URL=$URL" >> $GITHUB_ENV
         shell: bash
+
 
       - name: Debug downloaded file
         run: |
