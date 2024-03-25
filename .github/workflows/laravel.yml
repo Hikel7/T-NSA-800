@@ -103,7 +103,8 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.ID_RSA }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H 192.0.2.1 >> ~/.ssh/known_hosts
+          ssh-keyscan -H 198.51.100.1 >> ~/.ssh/known_hosts
 
     
       - name: Execute Ansible Playbook
