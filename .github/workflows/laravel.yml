@@ -54,17 +54,6 @@ jobs:
           done
         working-directory: ${{ github.workspace }}
 
-
-      # - name: Build and push Docker images
-      #   run: |
-      #     mkdir -p docker_images
-      #     services=$(docker-compose -f ./docker-compose.yaml config --services)
-      #     for service in $services; do
-      #       docker-compose -f ./docker-compose.yaml build $service
-      #       docker-compose -f ./docker-compose.yaml push $service
-      #     done
-      #   working-directory: ${{ github.workspace }}
-
       - name: List Docker images
         run: docker images
 
@@ -73,9 +62,25 @@ jobs:
 
       - name: Upload Docker images as artifacts
         uses: actions/upload-artifact@v4
+        id : upload
         with:
           name: docker-images
           path: docker_images/
+      
+      - name: Output artifact ID
+        run:  echo 'Artifact ID is ${{ steps.upload.outputs.artifact-id }}'
+
+  
+  download-artifacts : 
+    runs-on: ubuntu-latest
+    needs : laravel-tests
+
+    services:
+      docker:
+        image: docker:latest
+        options: --privileged
+    
+    steps:
 
       - name: Get Artifact Download URL
         id: get-artifact-url
@@ -90,39 +95,22 @@ jobs:
         shell: bash
 
 
-      - name: Debug downloaded file
-        run: |
-          ls -l docker_images/
-          file docker_images/docker-images.zip
+      # - name: Debug downloaded file
+      #   run: |
+      #     ls -l docker_images/
+      #     file docker_images/docker-images.zip
     
-      - name: Download Docker images artifact
-        run: |
-          mkdir -p docker_images
-          # Utilisation de curl pour télécharger l'artefact
-          curl -L -o docker_images/docker-images.zip ${{ env.ARTIFACT_URL }}
-          ls -l docker_images/
-          file docker_images/docker-images.zip
-          # Utilisation de unzip pour extraire le fichier .zip
-          unzip docker_images/docker-images.zip -d docker_images/
-        working-directory: ${{ github.workspace }}
+      # - name: Download Docker images artifact
+      #   run: |
+      #     mkdir -p docker_images
+      #     # Utilisation de curl pour télécharger l'artefact
+      #     curl -L -o docker_images/docker-images.zip ${{ env.ARTIFACT_URL }}
+      #     ls -l docker_images/
+      #     file docker_images/docker-images.zip
+      #     # Utilisation de unzip pour extraire le fichier .zip
+      #     unzip docker_images/docker-images.zip -d docker_images/
+      #   working-directory: ${{ github.workspace }}
 
 
-      - name: Load Docker images and push to remote server
-        run: |
-          mkdir -p ansible
-          echo "- hosts: remote
-            tasks:
-              - name: Copy Docker images
-                copy:
-                  src: ./docker_images/
-                  dest: /home
-                  owner: root
-                  group: root
-                  mode: '0755'
-              - name: Load Docker images
-                command: docker load -i /home/{{ item }}
-                with_items: "{{ lookup('fileglob', './docker_images/*', wantlist=True) }}"
-            become: yes" > ansible/deploy.yml
-          ansible-playbook -i ./inventory.yml ansible/deploy.yml
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: False
+
+  
