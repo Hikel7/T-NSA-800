@@ -28,7 +28,6 @@ jobs:
         run: |
           docker-compose -f ./docker-compose.yaml up -d
           docker-compose -f ./docker-compose.yaml ps
-
       - name: Install Dependencies
         run: docker-compose -f ./docker-compose.yaml exec -T app composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
@@ -46,7 +45,6 @@ jobs:
           docker-compose -f ./docker-compose.yaml exec -T app php artisan config:clear
           docker-compose -f ./docker-compose.yaml exec -T app php artisan view:clear
           docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
-
       - name: Save Docker images as artifacts
         run: |
           mkdir -p docker_images
@@ -78,3 +76,53 @@ jobs:
         with:
           name: docker-images
           path: docker_images/
+
+      - name: Get Artifact Download URL
+        id: get-artifact-url
+        run: |
+          ARTIFACT_NAME="docker-images"
+          RESPONSE=$(curl -L -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts")
+          URL=$(echo $RESPONSE | jq -r ".artifacts[] | select(.name==\"$ARTIFACT_NAME\") | .url")
+          echo "ARTIFACT_URL=$URL" >> $GITHUB_ENV
+        shell: bash
+
+
+      - name: Debug downloaded file
+        run: |
+          ls -l docker_images/
+          file docker_images/docker-images.zip
+    
+      - name: Download Docker images artifact
+        run: |
+          mkdir -p docker_images
+          # Utilisation de curl pour télécharger l'artefact
+          curl -L -o docker_images/docker-images.zip ${{ env.ARTIFACT_URL }}
+          ls -l docker_images/
+          file docker_images/docker-images.zip
+          # Utilisation de unzip pour extraire le fichier .zip
+          unzip docker_images/docker-images.zip -d docker_images/
+        working-directory: ${{ github.workspace }}
+
+
+      - name: Load Docker images and push to remote server
+        run: |
+          mkdir -p ansible
+          echo "- hosts: remote
+            tasks:
+              - name: Copy Docker images
+                copy:
+                  src: ./docker_images/
+                  dest: /home
+                  owner: root
+                  group: root
+                  mode: '0755'
+              - name: Load Docker images
+                command: docker load -i /home/{{ item }}
+                with_items: "{{ lookup('fileglob', './docker_images/*', wantlist=True) }}"
+            become: yes" > ansible/deploy.yml
+          ansible-playbook -i ./inventory.yml ansible/deploy.yml
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: False
