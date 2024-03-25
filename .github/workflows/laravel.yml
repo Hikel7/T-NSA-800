@@ -88,6 +88,10 @@ jobs:
           unzip docker_images/docker-images.zip -d docker_images/
         working-directory: ${{ github.workspace }}
 
+      - name: List contents of docker_images directory
+        run: ls -lah docker_images/
+        working-directory: ${{ github.workspace }}
+
 
 
   
