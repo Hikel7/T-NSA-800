@@ -102,7 +102,7 @@ jobs:
         env:
           DOCKER_IMAGES_PATH: ${{ github.workspace }}/docker_images
         run: |
-          ansible-playbook -i ansible/inventory/hosts ansible/deploy_docker_images.yml
+          ansible-playbook -i ansible/inventory/hosts.yaml ansible/playbook.yaml
         working-directory: ${{ github.workspace }}
       
 
