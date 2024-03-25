@@ -14,6 +14,8 @@ permissions:
 jobs:
   laravel-tests:
     runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.upload.outputs.artifact-id }}
 
     services:
       docker:
@@ -73,43 +75,18 @@ jobs:
   
   download-artifacts : 
     runs-on: ubuntu-latest
-    needs : laravel-tests
+    needs: laravel-tests
 
-    services:
-      docker:
-        image: docker:latest
-        options: --privileged
-    
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      - name: Get Artifact Download URL
-        id: get-artifact-url
+      - name: Download Docker images artifact
         run: |
-          ARTIFACT_NAME="docker-images"
-          RESPONSE=$(curl -L -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts")
-          URL=$(echo $RESPONSE | jq -r ".artifacts[] | select(.name==\"$ARTIFACT_NAME\") | .url")
-          echo "ARTIFACT_URL=$URL" >> $GITHUB_ENV
-        shell: bash
-
-
-      # - name: Debug downloaded file
-      #   run: |
-      #     ls -l docker_images/
-      #     file docker_images/docker-images.zip
-    
-      # - name: Download Docker images artifact
-      #   run: |
-      #     mkdir -p docker_images
-      #     # Utilisation de curl pour télécharger l'artefact
-      #     curl -L -o docker_images/docker-images.zip ${{ env.ARTIFACT_URL }}
-      #     ls -l docker_images/
-      #     file docker_images/docker-images.zip
-      #     # Utilisation de unzip pour extraire le fichier .zip
-      #     unzip docker_images/docker-images.zip -d docker_images/
-      #   working-directory: ${{ github.workspace }}
+          mkdir -p docker_images
+          curl -L -o docker_images/docker-images.zip -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${{ needs.laravel-tests.outputs.output1 }}/zip"
+          unzip docker_images/docker-images.zip -d docker_images/
+        working-directory: ${{ github.workspace }}
 
 
 
