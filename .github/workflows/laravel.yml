@@ -97,5 +97,13 @@ jobs:
           docker load -i docker_images/t-nsa-800_app_latest.tar
           docker load -i docker_images/t-nsa-800_db_latest.tar
         working-directory: ${{ github.workspace }}
+      
+      - name: Execute Ansible Playbook
+        env:
+          DOCKER_IMAGES_PATH: ${{ github.workspace }}/docker_images
+        run: |
+          ansible-playbook -i ansible/inventory/hosts ansible/deploy_docker_images.yml
+        working-directory: ${{ github.workspace }}
+      
 
   
