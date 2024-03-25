@@ -88,14 +88,15 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
             | jq -r ".artifacts[] | select(.name==\"$ARTIFACT_NAME\") | .archive_download_url")
-          echo "::set-output name=url::$URL"
+          echo "ARTIFACT_URL=$URL" >> $GITHUB_ENV
         shell: bash
+
 
     
       - name: Download Docker images artifact
         run: |
           mkdir -p docker_images
-          curl -L -o docker_images/docker-images.tar.gz ${{ steps.get-artifact-url.outputs.url }}
+          curl -L -o docker_images/docker-images.tar.gz ${{ env.ARTIFACT_URL }}
           tar -xzf docker_images/docker-images.tar.gz -C docker_images/
         working-directory: ${{ github.workspace }}
 
