@@ -97,7 +97,15 @@ jobs:
           docker load -i docker_images/t-nsa-800_app_latest.tar
           docker load -i docker_images/t-nsa-800_db_latest.tar
         working-directory: ${{ github.workspace }}
-      
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ID_RSA }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+    
       - name: Execute Ansible Playbook
         env:
           DOCKER_IMAGES_PATH: ${{ github.workspace }}/docker_images
