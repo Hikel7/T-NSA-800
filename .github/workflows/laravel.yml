@@ -96,8 +96,10 @@ jobs:
       - name: Download Docker images artifact
         run: |
           mkdir -p docker_images
-          curl -L -o docker_images/docker-images.tar.gz ${{ env.ARTIFACT_URL }}
-          tar -xzf docker_images/docker-images.tar.gz -C docker_images/
+          # Utilisation de curl pour télécharger l'artefact
+          curl -L -o docker_images/docker-images.zip ${{ env.ARTIFACT_URL }}
+          # Utilisation de unzip pour extraire le fichier .zip
+          unzip docker_images/docker-images.zip -d docker_images/
         working-directory: ${{ github.workspace }}
 
 
