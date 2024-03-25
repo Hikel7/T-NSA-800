@@ -2,7 +2,7 @@ name: Deploy Docker Images
 
 on:
   workflow_run:
-    workflows: ["laravel"]
+    workflows: ["Laravel"]
     branches: [main]
     types:
       - completed
