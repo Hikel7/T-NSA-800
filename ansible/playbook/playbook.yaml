@@ -4,10 +4,10 @@
     - name: Copy Docker Image for App
       copy:
         src: "{{ lookup('env', 'DOCKER_IMAGES_PATH') }}/t-nsa-800_app_latest.tar"
-        dest: "/etc/t-nsa-800_app_latest.tar"
+        dest: "/tmp/images/t-nsa-800_app_latest.tar"
 
     - name: Load Docker Image for App
-      command: docker load -i /etc/t-nsa-800_app_latest.tar
+      command: docker load -i /tmp/images/t-nsa-800_app_latest.tar
       become: yes
 
     - name: Run Docker Container for App
@@ -23,10 +23,10 @@
     - name: Copy Docker Image for DB
       copy:
         src: "{{ lookup('env', 'DOCKER_IMAGES_PATH') }}/t-nsa-800_db_latest.tar"
-        dest: "/etc/t-nsa-800_db_latest.tar"
+        dest: "/tmp/images/t-nsa-800_db_latest.tar"
 
     - name: Load Docker Image for DB
-      command: docker load -i /etc/t-nsa-800_db_latest.tar
+      command: docker load -i /tmp/images/t-nsa-800_db_latest.tar
       become: yes
 
     - name: Run Docker Container for DB
