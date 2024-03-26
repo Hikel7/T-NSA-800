@@ -30,7 +30,7 @@ services:
       DB_DATABASE: lostopsdb
       DB_USERNAME: mysqladmin@mysqlserverops
       DB_PASSWORD: H@Sh1CoR3P@ssw0rd
-      MYSQL_ATTR_SSL_CA: /chemin/vers/ca-cert.pem
+      # MYSQL_ATTR_SSL_CA: /chemin/vers/ca-cert.pem
     depends_on:
       - db
     labels:
@@ -39,7 +39,9 @@ services:
   db:
     build:
       context: .
-      dockerfile: Dockerfile.db # Assuming your Dockerfile for the db service is named Dockerfile.db
+      dockerfile: Dockerfile.db 
+    ports:
+      - "3306:3306"
     restart: always
     environment:
       MYSQL_DATABASE: lostopsdb
@@ -48,6 +50,5 @@ services:
       MYSQL_ROOT_PASSWORD: H@Sh1CoR3P@ssw0rd
     volumes:
       - db_data:/var/lib/mysql
-      # - /chemin/sur/hote/ca-cert.pem:/chemin/dans/conteneur/ca-cert.pem
 volumes:
   db_data:
