@@ -3,10 +3,10 @@ all:
     app:
       hosts:
         app_host:
-          ansible_host: 23.97.228.5
+          ansible_host: 40.91.245.183
           ansible_user: admuser
     database:
       hosts:
         db_host:
-          ansible_host: 137.117.225.75
+          ansible_host: 40.91.246.36
           ansible_user: admuser
