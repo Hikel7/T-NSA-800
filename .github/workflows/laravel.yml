@@ -104,7 +104,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H 40.91.245.183 >> ~/.ssh/known_hosts
-          ssh-keyscan -H 40.91.246.36 >> ~/.ssh/known_hosts
+          ssh-keyscan -H 172.201.146.21 >> ~/.ssh/known_hosts
 
     
       - name: Execute Ansible Playbook
