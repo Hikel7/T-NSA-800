@@ -35,9 +35,8 @@ jobs:
 
       - name: Generate key and update .env file
         run: |
-          docker-compose -f ./docker-compose.yaml exec -T app bash -c "php artisan key:generate --show > tempkey.txt"
-          docker-compose -f ./docker-compose.yaml exec -T app bash -c "echo \"APP_KEY=$(cat tempkey.txt)\" >> .env"
-          rm tempkey.txt
+          docker-compose -f ./docker-compose.yaml exec -T app bash -c "php artisan key:generate --show | while read key; do echo \"APP_KEY=\$key\" >> .env; done"
+      
       
       - name: Directory Permissions
         run: docker-compose -f ./docker-compose.yaml exec -T app chmod -R 777 storage bootstrap/cache
