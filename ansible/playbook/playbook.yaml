@@ -15,6 +15,8 @@
         name: application
         image: "t-nsa-800_app:latest"
         state: started
+        ports:
+          - "80:80"
       become: yes
 
 # - name: Deploy Docker Images to DB 
