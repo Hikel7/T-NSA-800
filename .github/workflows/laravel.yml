@@ -34,7 +34,9 @@ jobs:
         run: docker-compose -f ./docker-compose.yaml exec -T app composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Generate key
-        run: docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
+        run: |
+          APP_KEY=$(docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate --show)
+          echo "APP_KEY=$APP_KEY" >> .env
 
       - name: Directory Permissions
         run: docker-compose -f ./docker-compose.yaml exec -T app chmod -R 777 storage bootstrap/cache
@@ -46,7 +48,7 @@ jobs:
           docker-compose -f ./docker-compose.yaml exec -T app php artisan route:clear
           docker-compose -f ./docker-compose.yaml exec -T app php artisan config:clear
           docker-compose -f ./docker-compose.yaml exec -T app php artisan view:clear
-          docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
+          # docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
       - name: Save Docker images as artifacts
         run: |
           mkdir -p docker_images
