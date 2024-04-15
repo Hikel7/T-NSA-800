@@ -33,11 +33,12 @@ jobs:
       - name: Install Dependencies
         run: docker-compose -f ./docker-compose.yaml exec -T app composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-      - name: Generate key
+      - name: Generate key and update .env file
         run: |
-          APP_KEY=$(docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate --show)
-          echo "APP_KEY=$APP_KEY" >> .env
-
+          docker-compose -f ./docker-compose.yaml exec -T app bash -c "php artisan key:generate --show > tempkey.txt"
+          docker-compose -f ./docker-compose.yaml exec -T app bash -c "echo \"APP_KEY=$(cat tempkey.txt)\" >> .env"
+          rm tempkey.txt
+      
       - name: Directory Permissions
         run: docker-compose -f ./docker-compose.yaml exec -T app chmod -R 777 storage bootstrap/cache
 
