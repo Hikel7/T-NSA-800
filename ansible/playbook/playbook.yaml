@@ -11,7 +11,7 @@
       become: yes
 
     - name: Run php artisan key:generate inside container
-      command: docker exec application php artisan key:generate
+      command: sudo docker exec application php artisan key:generate
       become: yes
       register: key_generate_result
       ignore_errors: yes
