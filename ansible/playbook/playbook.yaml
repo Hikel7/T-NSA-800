@@ -47,5 +47,5 @@
         image: "t-nsa-800_db:latest"
         state: started
         published_ports:
-          - "3306:3306"
+          - "3307:3307"
       become: yes
