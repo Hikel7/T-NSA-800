@@ -5,11 +5,11 @@ all:
         app_host:
           ansible_host: app-web192844.westeurope.cloudapp.azure.com
           ansible_user: admuser
-    # database:
-    #   hosts:
-    #     db_host:
-    #       ansible_host: app-database285182.westeurope.cloudapp.azure.com
-    #       ansible_user: admuser
+    database:
+      hosts:
+        db_host:
+          ansible_host: app-database709069.westeurope.cloudapp.azure.com
+          ansible_user: admuser
     docker:
       hosts:
         dk_host:
