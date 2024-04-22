@@ -33,9 +33,11 @@ jobs:
       - name: Install Dependencies
         run: docker-compose -f ./docker-compose.yaml exec -T app composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-      - name: Generate key
-        run: docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
-
+      - name: Generate key and update .env file
+        run: |
+          docker-compose -f ./docker-compose.yaml exec -T app bash -c "php artisan key:generate --show | while read key; do echo \"APP_KEY=\$key\" >> .env; done"
+      
+      
       - name: Directory Permissions
         run: docker-compose -f ./docker-compose.yaml exec -T app chmod -R 777 storage bootstrap/cache
 
@@ -46,7 +48,7 @@ jobs:
           docker-compose -f ./docker-compose.yaml exec -T app php artisan route:clear
           docker-compose -f ./docker-compose.yaml exec -T app php artisan config:clear
           docker-compose -f ./docker-compose.yaml exec -T app php artisan view:clear
-          docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
+          # docker-compose -f ./docker-compose.yaml exec -T app php artisan key:generate
       - name: Save Docker images as artifacts
         run: |
           mkdir -p docker_images
@@ -113,8 +115,8 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H 40.91.245.183 >> ~/.ssh/known_hosts
-          ssh-keyscan -H 172.201.146.21 >> ~/.ssh/known_hosts
+          ssh-keyscan -H app-web192844.westeurope.cloudapp.azure.com >> ~/.ssh/known_hosts
+          ssh-keyscan -H app-database709069.westeurope.cloudapp.azure.com >> ~/.ssh/known_hosts
 
     
       - name: Execute Ansible Playbook

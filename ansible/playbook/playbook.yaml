@@ -10,14 +10,26 @@
       command: docker load -i /tmp/t-nsa-800_app_latest.tar
       become: yes
 
+    - name: Run php artisan key:generate inside container
+      command: sudo docker exec application php artisan key:generate
+      become: yes
+      register: key_generate_result
+      ignore_errors: yes
+
+    - name: Check if key:generate command was successful
+      debug:
+        msg: "{{ key_generate_result.stdout }}"
+      when: key_generate_result.rc == 0
+
     - name: Run Docker Container for App
       docker_container:
         name: application
         image: "t-nsa-800_app:latest"
         state: started
+        ports:
+          - "80:80"
       become: yes
-
-- name: Deploy Docker Images to DB 
+- name: Deploy Docker Images to DB
   hosts: db_host
   tasks:
     - name: Copy Docker Image for DB
@@ -35,5 +47,5 @@
         image: "t-nsa-800_db:latest"
         state: started
         published_ports:
-          - "3306:3306"
+          - "3307:3307"
       become: yes
