@@ -29,6 +29,7 @@
         ports:
           - "80:80"
       become: yes
+      
 # - name: Deploy Docker Images to DB
 #   hosts: db_host
 #   tasks:
@@ -62,31 +63,44 @@
   tasks:
     - name: Stop MySQL service
       service:
-        name: mysqld
+        name: mysql
         state: stopped
+      vars:
+        use_backend: apt
 
     - name: Remove MySQL
-      yum:
-        name: mysql-community-server
+      apt:
+        name: mysql-server
         state: absent
+      vars:
+        use_backend: apt
 
     - name: Install MySQL 5.7
-      yum:
-        name: mysql-community-server
+      apt:
+        name: mysql-server
         state: present
+      vars:
+        use_backend: apt
 
     - name: Start MySQL service
       service:
-        name: mysqld
+        name: mysql
         state: started
-        enabled: true
+        # enabled: true
 
-    - name: Set MySQL root password
+    - name: Ensure MySQL service is running.
+      service:
+        name: mysql
+        state: started
+
+    - name: Set MySQL root password.
       mysql_user:
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
         name: root
         password: "{{ mysql_root_password }}"
-        host: localhost
-        login_unix_socket: /var/lib/mysql/mysql.sock
+        priv: '*.*:ALL,GRANT'
+        host_all: yes
 
     - name: Create MySQL database
       mysql_db:
@@ -106,7 +120,8 @@
 
     - name: Flush privileges
       mysql_db:
-        name: "{{ mysql_database }}"
         login_user: root
         login_password: "{{ mysql_root_password }}"
-        state: flush_privs
+        state: import
+        name: all
+        target: /dev/null
