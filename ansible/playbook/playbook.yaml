@@ -51,7 +51,7 @@
 #       become: yes
 
 - name: Force reinstall MySQL 5.7 and allow public access
-  hosts: your_mysql_server
+  hosts: db_host
   become: true
   vars:
     mysql_database: "lostopsdb"
