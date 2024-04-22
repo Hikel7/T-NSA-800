@@ -2,7 +2,7 @@ name: Laravel
 
 on:
   push:
-    branches: [main, feature--adding-a-trivy-scan]
+    branches: [main, feature--trivy-instalation]
   pull_request:
     branches: [main]
 
