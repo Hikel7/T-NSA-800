@@ -70,8 +70,9 @@ jobs:
 
       - name: Scan Docker Images with Trivy
         run: |
+          mkdir -p trivy-reports
           docker images --format "{{.Repository}}:{{.Tag}}" | grep t-nsa-800 | while IFS=: read -r repo tag; do
-            trivy image --severity HIGH,CRITICAL "${repo}:${tag}"
+            trivy image --severity HIGH,CRITICAL --format json "${repo}:${tag}" > "trivy-reports/${repo}-${tag}.json"
           done
 
       - name: Upload Docker images as artifacts
