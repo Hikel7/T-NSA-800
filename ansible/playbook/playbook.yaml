@@ -29,23 +29,84 @@
         ports:
           - "80:80"
       become: yes
-- name: Deploy Docker Images to DB
-  hosts: db_host
+# - name: Deploy Docker Images to DB
+#   hosts: db_host
+#   tasks:
+#     - name: Copy Docker Image for DB
+#       copy:
+#         src: "{{ lookup('env', 'DOCKER_IMAGES_PATH') }}/t-nsa-800_db_latest.tar"
+#         dest: "/tmp/t-nsa-800_db_latest.tar"
+
+#     - name: Load Docker Image for DB
+#       command: docker load -i /tmp/t-nsa-800_db_latest.tar
+#       become: yes
+
+#     - name: Run Docker Container for DB
+#       docker_container:
+#         name: database
+#         image: "t-nsa-800_db:latest"
+#         state: started
+#         published_ports:
+#           - "3307:3307"
+#       become: yes
+
+- name: Force reinstall MySQL 5.7 and allow public access
+  hosts: your_mysql_server
+  become: true
+  vars:
+    mysql_database: "lostopsdb"
+    mysql_user: "mysqladmin@mysqlserverops"
+    mysql_password: "H@Sh1CoR3P@ssw0rd"
+    mysql_root_password: "H@Sh1CoR3P@ssw0rd"
+
   tasks:
-    - name: Copy Docker Image for DB
-      copy:
-        src: "{{ lookup('env', 'DOCKER_IMAGES_PATH') }}/t-nsa-800_db_latest.tar"
-        dest: "/tmp/t-nsa-800_db_latest.tar"
+    - name: Stop MySQL service
+      service:
+        name: mysqld
+        state: stopped
 
-    - name: Load Docker Image for DB
-      command: docker load -i /tmp/t-nsa-800_db_latest.tar
-      become: yes
+    - name: Remove MySQL
+      yum:
+        name: mysql-community-server
+        state: absent
 
-    - name: Run Docker Container for DB
-      docker_container:
-        name: database
-        image: "t-nsa-800_db:latest"
+    - name: Install MySQL 5.7
+      yum:
+        name: mysql-community-server
+        state: present
+
+    - name: Start MySQL service
+      service:
+        name: mysqld
         state: started
-        published_ports:
-          - "3307:3307"
-      become: yes
+        enabled: true
+
+    - name: Set MySQL root password
+      mysql_user:
+        name: root
+        password: "{{ mysql_root_password }}"
+        host: localhost
+        login_unix_socket: /var/lib/mysql/mysql.sock
+
+    - name: Create MySQL database
+      mysql_db:
+        name: "{{ mysql_database }}"
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        state: present
+
+    - name: Create MySQL user
+      mysql_user:
+        name: "{{ mysql_user.split('@')[0] }}"
+        password: "{{ mysql_password }}"
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        host: "%"
+        priv: "{{ mysql_database }}.*:ALL"
+
+    - name: Flush privileges
+      mysql_db:
+        name: "{{ mysql_database }}"
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        state: flush_privs
