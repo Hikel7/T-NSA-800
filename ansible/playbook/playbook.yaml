@@ -1,41 +1,41 @@
-- name: Deploy Docker Images to App
-  hosts: app_host
-  tasks:
-    - name: Copy Docker Image for App
-      copy:
-        src: "{{ lookup('env', 'DOCKER_IMAGES_PATH') }}/t-nsa-800_app_latest.tar"
-        dest: "/tmp/t-nsa-800_app_latest.tar"
+# - name: Deploy Docker Images to App
+#   hosts: app_host
+#   tasks:
+#     - name: Copy Docker Image for App
+#       copy:
+#         src: "{{ lookup('env', 'DOCKER_IMAGES_PATH }}/t-nsa-800_app_latest.tar"
+#         dest: "/tmp/t-nsa-800_app_latest.tar"
 
-    - name: Load Docker Image for App
-      command: docker load -i /tmp/t-nsa-800_app_latest.tar
-      become: yes
+#     - name: Load Docker Image for App
+#       command: docker load -i /tmp/t-nsa-800_app_latest.tar
+#       become: yes
 
-    - name: Run php artisan key:generate inside container
-      command: sudo docker exec application php artisan key:generate
-      become: yes
-      register: key_generate_result
-      ignore_errors: yes
+#     - name: Run php artisan key:generate inside container
+#       command: sudo docker exec application php artisan key:generate
+#       become: yes
+#       register: key_generate_result
+#       ignore_errors: yes
 
-    - name: Check if key:generate command was successful
-      debug:
-        msg: "{{ key_generate_result.stdout }}"
-      when: key_generate_result.rc == 0
+#     - name: Check if key:generate command was successful
+#       debug:
+#         msg: "{{ key_generate_result.stdout }}"
+#       when: key_generate_result.rc == 0
 
-    - name: Run Docker Container for App
-      docker_container:
-        name: application
-        image: "t-nsa-800_app:latest"
-        state: started
-        ports:
-          - "80:80"
-      become: yes
-      
+#     - name: Run Docker Container for App
+#       docker_container:
+#         name: application
+#         image: "t-nsa-800_app:latest"
+#         state: started
+#         ports:
+#           - "80:80"
+#       become: yes
+
 # - name: Deploy Docker Images to DB
 #   hosts: db_host
 #   tasks:
 #     - name: Copy Docker Image for DB
 #       copy:
-#         src: "{{ lookup('env', 'DOCKER_IMAGES_PATH') }}/t-nsa-800_db_latest.tar"
+#         src: "{{ lookup('env', 'DOCKER_IMAGES_PATH }}/t-nsa-800_db_latest.tar"
 #         dest: "/tmp/t-nsa-800_db_latest.tar"
 
 #     - name: Load Docker Image for DB
@@ -59,69 +59,103 @@
     mysql_user: "mysqladmin@mysqlserverops"
     mysql_password: "H@Sh1CoR3P@ssw0rd"
     mysql_root_password: "H@Sh1CoR3P@ssw0rd"
+    mysql_port: "3307" # Specify the desired port here
 
   tasks:
-    - name: Stop MySQL service
-      service:
-        name: mysql
-        state: stopped
-      vars:
-        use_backend: apt
+    # - name: Exécuter la commande iptables
+    #   ansible.builtin.command:
+    #     cmd: sudo iptables -R INPUT 3
+    #   become: yes
 
-    - name: Remove MySQL
-      apt:
-        name: mysql-server
-        state: absent
-      vars:
-        use_backend: apt
+      - name: Update package lists
+        apt:
+          update_cache: yes
+        become: yes
 
-    - name: Install MySQL 5.7
-      apt:
-        name: mysql-server
-        state: present
-      vars:
-        use_backend: apt
+      - name: Install pip for Python3
+        apt:
+          name: python3-pip
+          state: present
+        become: yes
 
-    - name: Start MySQL service
-      service:
-        name: mysql
-        state: started
-        # enabled: true
+      - name: Install python3-mysqldb
+        apt:
+          name: python3-mysqldb
+          state: present
+        become: yes
 
-    - name: Ensure MySQL service is running.
-      service:
-        name: mysql
-        state: started
+      - name: Install ufw
+        apt:
+          name: ufw
+          state: present
 
-    - name: Set MySQL root password.
-      mysql_user:
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-        name: root
-        password: "{{ mysql_root_password }}"
-        priv: '*.*:ALL,GRANT'
-        host_all: yes
+      - name: Deny everything and enable UFW
+        community.general.ufw:
+          state: enabled
+          policy: deny
 
-    - name: Create MySQL database
-      mysql_db:
-        name: "{{ mysql_database }}"
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-        state: present
+      - community.general.ufw:
+          rule: allow
+          name: OpenSSH
 
-    - name: Create MySQL user
-      mysql_user:
-        name: "{{ mysql_user.split('@')[0] }}"
-        password: "{{ mysql_password }}"
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-        host: "%"
-        priv: "{{ mysql_database }}.*:ALL"
+      - name: Allow all access to tcp port 80
+        community.general.ufw:
+          rule: allow
+          port: '3306'
 
-    - name: Flush privileges
-      mysql_db:
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-        state: import
-        name: all
-        target: /dev/null
+      - name: Install MariaDB Server
+        apt:
+          name: mariadb-server
+          state: present
+        become: yes
+
+      - name: Start and enable MariaDB Service
+        service:
+          name: mariadb
+          state: started
+          enabled: yes
+        become: yes
+
+      - name: Allow MariaDB to listen on all interfaces
+        lineinfile:
+          path: /etc/mysql/mariadb.conf.d/50-server.cnf
+          regexp: '^bind-address'
+          line: 'bind-address = 0.0.0.0'
+          state: present
+
+      - name: Create a remote user with access from any host
+        mysql_user:
+          login_user: "{{ mysql_user }}"
+          login_password: "{{ mysql_root_password }}"
+          name: "{{ mysql_user }}"
+          password: "{{ mysql_root_password }}"
+          host: '%'
+          priv: "{{ mysql_database }}.*:ALL"
+          state: present
+
+      - name: Ensure root password is set
+        mysql_user:
+          login_user: root
+          login_password: "{{ mysql_root_password }}"
+          name: root
+          password: "{{ mysql_root_password }}"
+          host_all: yes
+
+
+      - name: Add database
+        mysql_db:
+          login_user: root
+          login_password: "{{ mysql_root_password }}"
+          name: "{{ mysql_database') }}"
+          state: present
+
+      - name: Flush privileges
+        mysql_query:
+          login_user: root
+          login_password: "{{ mysql_root_password }}"
+          query: FLUSH PRIVILEGES;
+
+      - name: restart mariadb
+        service:
+          name: mariadb
+          state: restarted
