@@ -74,6 +74,13 @@ jobs:
           docker images --format "{{.Repository}}:{{.Tag}}" | grep t-nsa-800 | while IFS=: read -r repo tag; do
             trivy image --severity HIGH,CRITICAL --format json "${repo}:${tag}" > "trivy-reports/${repo}-${tag}.json"
           done
+      
+      - name: Generate and store Trivy reports
+        run: |
+          mkdir -p trivy-reports
+          docker images --format "{{.Repository}}:{{.Tag}}" | grep t-nsa-800 | while IFS=: read -r repo tag; do
+            trivy image --severity HIGH,CRITICAL --format json "${repo}:${tag}" > "trivy-reports/${repo}-${tag}.json"
+          done
 
       - name: Upload Docker images as artifacts
         uses: actions/upload-artifact@v4
