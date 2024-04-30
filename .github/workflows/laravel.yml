@@ -2,7 +2,7 @@ name: Laravel
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature--trivy-instalation]
   pull_request:
     branches: [main]
 
@@ -63,6 +63,24 @@ jobs:
 
       - name: List contents of docker_images directory
         run: ls -l docker_images/
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Scan Docker Images with Trivy
+        run: |
+          mkdir -p trivy-reports
+          docker images --format "{{.Repository}}:{{.Tag}}" | grep t-nsa-800 | while IFS=: read -r repo tag; do
+            trivy image --severity HIGH,CRITICAL --format json "${repo}:${tag}" > "trivy-reports/${repo}-${tag}.json"
+          done
+      
+      - name: Generate and store Trivy reports
+        run: |
+          mkdir -p trivy-reports
+          docker images --format "{{.Repository}}:{{.Tag}}" | grep t-nsa-800 | while IFS=: read -r repo tag; do
+            trivy image --severity HIGH,CRITICAL --format json "${repo}:${tag}" > "trivy-reports/${repo}-${tag}.json"
+          done
 
       - name: Upload Docker images as artifacts
         uses: actions/upload-artifact@v4
